@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>你的专属测评报告</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:PingFang SC}
+        body{background:#f3effb;padding:25px 15px}
+        .report-box{max-width:600px;margin:0 auto;background:#fff;border-radius:20px;overflow:hidden}
+        .report-top{background:#8458d8;color:#fff;padding:30px 20px;text-align:center}
+        .report-top h2{margin-bottom:8px}
+        .score-text{font-size:32px;font-weight:bold;margin:10px 0}
+        .content{padding:25px;line-height:1.8;color:#333}
+        .content h3{color:#8458d8;margin:20px 0 10px}
+        .reset-btn{display:block;width:90%;margin:30px auto;height:55px;border:none;background:#8458d8;color:#fff;border-radius:12px;font-size:17px;cursor:pointer}
+    </style>
+</head>
+<body>
+    <div class="report-box">
+        <div class="report-top">
+            <h2>情绪内核完整测评报告</h2>
+            <p>50题专业分析 · 你的最终得分</p>
+            <div class="score-text" id="finalScore"></div>
+            <div id="levelName"></div>
+        </div>
+        <div class="content" id="resultContent"></div>
+        <button class="reset-btn" onclick="restart()">重新测评</button>
+    </div>
+
+<script>
+const totalScore = parseInt(localStorage.getItem('scoreTotal'));
+document.getElementById('finalScore').innerText = totalScore + " 分";
+
+// 总分区间：最低50分，最高200分
+let level,content;
+if(totalScore >= 50 && totalScore <= 75){
+    level = "松弛王者 · 零内耗体质";
+    content = `<h3>性格画像</h3>
+    你的内心秩序极度稳定，拥有清晰的自我边界，很少被外界评价裹挟，懂得拒绝、懂得自爱，精神自愈力拉满。
+    <h3>优势</h3>
+    情绪稳定，不容易焦虑敏感，不会讨好别人，拥有强大的内核，不易被他人消耗。
+    <h3>小建议</h3>
+    继续保持当下的生活节奏，不必刻意迎合世俗，你的松弛感本身就是稀缺的个人魅力。`
+}else if(totalScore >=76 && totalScore <=100){
+    level = "轻度敏感 · 低内耗选手";
+    content = `<h3>性格画像</h3>
+    大部分时候心态平和，仅在特殊场景下会短暂思虑过多，拥有基础边界感，能够快速调节情绪。
+    <h3>优势</h3>
+    共情力适中，待人温柔但不会过度付出，懂得及时止损，自愈速度很快。
+    <h3>优化方向</h3>
+    减少对他人细节的过度解读，不必为无关紧要的人和事消耗自己。`
+}else if(totalScore >=101 && totalScore <=125){
+    level = "中度共情 · 间歇性内耗";
+    content = `<h3>性格画像</h3>
+    典型高敏感人格，习惯性换位思考，容易承接别人的负面情绪，白天理性通透，深夜容易胡思乱想。
+    <h3>优势</h3>
+    细腻温柔，观察力极强，情商很高，擅长照顾身边人的感受，人缘很好。
+    <h3>短板</h3>
+    容易心软妥协，不懂拒绝，经常委屈自己成全别人，产生疲惫感。
+    <h3>调整方案</h3>
+    建立人际边界，学会温柔而坚定地说不，把一部分善意收回给自己。`
+}else if(totalScore >=126 && totalScore <=150){
+    level = "讨好型人格 · 重度精神内耗";
+    content = `<h3>性格画像</h3>
+    你总是优先满足他人期待，压抑自身需求，害怕冲突、害怕被讨厌，长期精神紧绷，身心疲惫。
+    <h3>核心问题</h3>
+    价值感依附于别人的认可，一旦被忽视就会自我怀疑，睡前复盘一整天的言行，焦虑失眠。
+    <h3>改善建议</h3>
+    记住：你的善良需要带锋芒，不必所有人都喜欢你，优先取悦自己才是终身课题。`
+}else if(totalScore >=151 && totalScore <=175){
+    level = "焦虑型体质 · 过度思虑者";
+    content = `<h3>性格画像</h3>
+    灾难化思维严重，习惯预判所有最坏结果，一点小事就反复纠结，内心戏极多，精神高度紧绷。
+    <h3>现状</h3>
+    极易被他人情绪影响，边界感薄弱，习惯性自我苛责，长期处于高压内耗状态。
+    <h3>疗愈方式</h3>
+    减少空想，用行动代替思虑，接纳事情的不完美，允许自己犯错、允许他人失望。`
+}else{
+    level = "极致敏感 · 深度自我消耗型";
+    content = `<h3>性格画像</h3>
+    你的内核极其脆弱，极度在意别人眼光，无底线讨好、无边界妥协，长期自我否定，情绪极易崩溃。
+    <h3>潜在隐患</h3>
+    长期内耗会导致神经衰弱、睡眠障碍、情绪抑郁，你的所有疲惫，都源于过度善待世界，亏待自己。
+    <h3>紧急调整方案</h3>
+    立刻停止讨好所有人，切断消耗你的人际关系，每天留出专属治愈时间，降低期待，放下执念。`
+}
+
+document.getElementById('levelName').innerText = level;
+document.getElementById('resultContent').innerHTML = content;
+
+// 重置所有缓存，回到首页
+function restart(){
+    localStorage.clear();
+    window.location.href = "index.html";
+}
+</script>
+</body>
+</html>
