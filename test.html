@@ -37,7 +37,11 @@
     <div class="tip">点击任意选项，自动进入下一题</div>
 
 <script>
-// ========== 题库配置：每题 A:1分 B:2分 C:3分 D:4分 ==========
+// 打开页面清空旧缓存，避免数据错乱
+localStorage.removeItem('scoreTotal');
+localStorage.removeItem('currentIndex');
+
+// 50道完整题库 A=1 B=2 C=3 D=4
 const questionList = [
     {q:"别人随口一句负面评价，你会反复琢磨很久？",opt:["完全不会","偶尔会","经常会","一定会"]},
     {q:"休息日你更愿意？",opt:["独处静养","和少数好友相处","应付社交但很累","频繁参加各种聚会"]},
@@ -92,11 +96,11 @@ const questionList = [
     {q:"你常常因为心软，不断降低自己的底线？",opt:["底线坚定不动摇","小幅让步","底线不断后退","完全没有边界"]}
 ];
 
-let scoreTotal = Number(localStorage.getItem('scoreTotal')) || 0;
-let currentIndex = Number(localStorage.getItem('currentIndex')) || 0;
+let scoreTotal = 0;
+let currentIndex = 0;
 const totalNum = questionList.length;
 
-// 渲染当前题目
+// 渲染题目函数
 function render(){
     const item = questionList[currentIndex];
     document.getElementById('question').innerText = item.q;
@@ -105,28 +109,26 @@ function render(){
         html += `<div class="option" onclick="selectAnswer(${idx+1})">${String.fromCharCode(65+idx)}、${opt}</div>`
     })
     document.getElementById('optionsBox').innerHTML = html;
-    // 进度
-    let per = ((currentIndex+1)/totalNum*100).toFixed(1);
+    const per = ((currentIndex+1)/totalNum*100).toFixed(1);
     document.getElementById('pageNum').innerText = `${currentIndex+1}/${totalNum}`;
     document.getElementById('per').innerText = per+'%';
     document.getElementById('progressBar').style.width = per+'%';
 }
 
-// 选择答案，累加分数，进入下一题
+// 选择答案跳转逻辑
 function selectAnswer(score){
     scoreTotal += score;
     currentIndex++;
-    // 存入本地缓存
     localStorage.setItem('scoreTotal',scoreTotal);
     localStorage.setItem('currentIndex',currentIndex);
     if(currentIndex >= totalNum){
-        // 全部答完跳转结果页
         window.location.href = "result.html";
     }else{
         render();
     }
 }
 
+// 页面加载完成执行渲染
 render();
 </script>
 </body>
