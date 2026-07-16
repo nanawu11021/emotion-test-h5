@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>恋爱人格测评报告</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:PingFang SC}
+body{background:#291c26;color:#f1f1f1;min-height:100vh;padding:20px;max-width:640px;margin:0 auto}
+h2{font-size:22px;text-align:center;margin-bottom:20px;color:#ffd6e7}
+.dim{margin:18px 0}
+.dim-name{font-size:15px;margin-bottom:6px;color:#e3c8d5}
+.dim-bar{height:8px;background:#3f2a39;border-radius:99px}
+.dim-fill{height:100%;background:#dd5588;border-radius:99px}
+.report{line-height:1.8;color:#e3c8d5;margin:28px 0;font-size:15px}
+.btn{width:100%;padding:16px;background:#dd5588;border:none;border-radius:12px;color:#fff;font-size:16px;margin-top:10px}
+.back-intro{background:#3f2a39;color:#ccc}
+</style>
+</head>
+<body>
+<h2>你的亲密关系完整报告</h2>
+<div class="dim">
+    <p class="dim-name">恋爱安全感指数</p>
+    <div class="dim-bar"><div class="dim-fill" id="d1"></div></div>
+</div>
+<div class="dim">
+    <p class="dim-name">情感依附程度</p>
+    <div class="dim-bar"><div class="dim-fill" id="d2"></div></div>
+</div>
+<div class="dim">
+    <p class="dim-name">主动付出倾向</p>
+    <div class="dim-bar"><div class="dim-fill" id="d3"></div></div>
+</div>
+<div class="dim">
+    <p class="dim-name">占有吃醋程度</p>
+    <div class="dim-bar"><div class="dim-fill" id="d4"></div></div>
+</div>
+<div class="dim">
+    <p class="dim-name">恋爱独立人格值</p>
+    <div class="dim-bar"><div class="dim-fill" id="d5"></div></div>
+</div>
+<div class="report" id="text"></div>
+<button class="btn" onclick="location.href='index.html'">重新测试</button>
+<button class="btn back-intro" onclick="location.href='intro.html'">返回测评介绍</button>
+
+<script>
+let scoreArr = JSON.parse(localStorage.getItem("loveScore"));
+let totalSum = scoreArr.reduce((a,b)=>a+b,0);
+let maxTotal = 80;
+let insecure = Math.round((totalSum/maxTotal)*100);
+let independent = 100 - insecure;
+
+document.getElementById("d1").style.width = insecure+"%";
+document.getElementById("d2").style.width = insecure+"%";
+document.getElementById("d3").style.width = insecure+"%";
+document.getElementById("d4").style.width = insecure+"%";
+document.getElementById("d5").style.width = independent+"%";
+
+let resText = "";
+if(insecure >=70){
+    resText = `依恋类型：焦虑依附型恋人
+你在感情里极度缺乏安全感，敏感爱吃醋，习惯全盘付出、委屈自己。害怕被冷落抛弃，容易过度黏人、翻看手机，对方一点点冷淡都会让你自我怀疑。长期在感情里自我消耗，需要学会建立自我安全感，不要把人生全部寄托在另一半身上。`;
+}else if(insecure >=45){
+    resText = `依恋类型：温柔付出型恋人
+你很重感情，愿意包容迁就伴侣，内心渴望对等的爱意，容易因为对方冷淡暗自难过。会纠结舍不得放下过往，占有欲中等，需要多和伴侣坦诚沟通需求，不必一味妥协讨好。`;
+}else{
+    resText = `依恋类型：成熟独立型恋人
+你拥有健康的恋爱观，自爱大于爱人，信任伴侣同时保留完整自我边界。不猜忌、不黏人、不吃无意义的醋，感情只是生活加分项，不合适会果断及时止损，很少在亲密关系里内耗。`;
+}
+document.getElementById("text").innerText = resText;
+</script>
+</body>
+</html>
