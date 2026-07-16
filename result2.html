@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>你的人格测评报告</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:PingFang SC}
+body{background:#1c1a29;color:#f1f1f1;min-height:100vh;padding:20px;max-width:640px;margin:0 auto}
+h2{font-size:22px;text-align:center;margin-bottom:20px;color:#e8dfff}
+.dim{margin:18px 0}
+.dim-name{font-size:15px;margin-bottom:6px;color:#d3c8f5}
+.dim-bar{height:8px;background:#2d2a3f;border-radius:99px}
+.dim-fill{height:100%;background:#a07eff;border-radius:99px}
+.report{line-height:1.8;color:#d8d2f0;margin:28px 0;font-size:15px}
+.btn{width:100%;padding:16px;background:#8b6cd2;border:none;border-radius:12px;color:#fff;font-size:16px;margin-top:10px}
+.back-intro{background:#333047;color:#ccc}
+</style>
+</head>
+<body>
+<h2>你的内心人格完整报告</h2>
+<div class="dim">
+    <p class="dim-name">精神内耗指数</p>
+    <div class="dim-bar"><div class="dim-fill" id="d1"></div></div>
+</div>
+<div class="dim">
+    <p class="dim-name">自我边界感</p>
+    <div class="dim-bar"><div class="dim-fill" id="d2"></div></div>
+</div>
+<div class="dim">
+    <p class="dim-name">情绪自愈能力</p>
+    <div class="dim-bar"><div class="dim-fill" id="d3"></div></div>
+</div>
+<div class="dim">
+    <p class="dim-name">深夜焦虑程度</p>
+    <div class="dim-bar"><div class="dim-fill" id="d4"></div></div>
+</div>
+<div class="dim">
+    <p class="dim-name">讨好型人格倾向</p>
+    <div class="dim-bar"><div class="dim-fill" id="d5"></div></div>
+</div>
+<div class="report" id="text"></div>
+<button class="btn" onclick="location.href='index.html'">重新测试</button>
+<button class="btn back-intro" onclick="location.href='intro.html'">返回测评介绍</button>
+
+<script>
+let scoreArr = JSON.parse(localStorage.getItem("testScore"));
+let totalSum = scoreArr.reduce((a,b)=>a+b,0);
+let maxTotal = 80;
+let waste = Math.round((totalSum/maxTotal)*100);
+let boundary = 100 - waste;
+let heal = boundary;
+let night = waste;
+let please = waste;
+
+document.getElementById("d1").style.width = waste+"%";
+document.getElementById("d2").style.width = boundary+"%";
+document.getElementById("d3").style.width = heal+"%";
+document.getElementById("d4").style.width = night+"%";
+document.getElementById("d5").style.width = please+"%";
+
+let resText = "";
+if(waste >=70){
+    resText = `你的精神内耗等级：重度
+你属于高敏感、高讨好型人格，极易深夜焦虑。习惯自我反思、迁就他人，常常压抑自身需求，小事反复复盘消耗大量情绪能量。自我边界极弱，不懂拒绝，自愈速度很慢，长期容易身心疲惫。建议减少过度共情，学会优先照顾自己的感受，建立清晰人际边界。`;
+}else if(waste >=45){
+    resText = `你的精神内耗等级：中度
+你共情力很强，容易被他人情绪影响，偶尔讨好迁就别人，深夜容易胡思乱想焦虑。拥有一定自愈能力，但遇事容易往坏处脑补，会反复纠结过往不愉快。可以练习适当拒绝，减少不必要的自我反思，降低思虑。`;
+}else{
+    resText = `你的精神内耗等级：轻度松弛型
+你拥有稳定清晰的自我边界，很少讨好别人，钝感力充足。深夜不易焦虑，情绪自愈速度很快，不会为他人的评价、小事反复内耗。懂得自爱，能够合理划分自己与他人的情绪，心态松弛稳定。`;
+}
+document.getElementById("text").innerText = resText;
+</script>
+</body>
+</html>
