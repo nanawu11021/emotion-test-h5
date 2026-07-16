@@ -1,134 +1,116 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>答题中</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box;font-family:PingFang SC}
-        body{background:#f3effb;padding:20px}
-        .progress-box{max-width:580px;margin:0 auto 30px}
-        .progress-top{display:flex;justify-content:space-between;color:#888;font-size:14px;margin-bottom:8px}
-        .progress-bg{width:100%;height:6px;background:#e2dcf5;border-radius:99px}
-        .progress-active{height:100%;background:#8458d8;border-radius:99px;width:0%}
-        .q-wrap{max-width:580px;margin:0 auto;background:#fff;border-radius:16px;padding:30px 24px;box-shadow:0 3px 15px #ebe5f9}
-        .q-title{font-size:20px;color:#333;margin-bottom:26px;line-height:1.6}
-        .option{border:1px solid #e1d9f5;border-radius:12px;padding:18px 16px;margin-bottom:14px;cursor:pointer;transition:0.2s}
-        .option:hover{border-color:#8458d8;background:#f9f6ff}
-        .tip{text-align:center;margin-top:30px;color:#aaa;font-size:13px}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>答题中</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:PingFang SC}
+body{background:#f3effb;padding:20px}
+.progress-box{max-width:580px;margin:0 auto 30px}
+.progress-top{display:flex;justify-content:space-between;color:#888;font-size:14px;margin-bottom:8px}
+.progress-bg{width:100%;height:6px;background:#e2dcf5;border-radius:99px}
+.progress-active{height:100%;background:#8458d8;border-radius:99px;width:0%}
+.q-wrap{max-width:580px;margin:0 auto;background:#fff;border-radius:16px;padding:30px 24px;box-shadow:0 3px 15px #ebe5f9}
+.q-title{font-size:20px;color:#333;margin-bottom:26px;line-height:1.6}
+.option{border:1px solid #e1d9f5;border-radius:12px;padding:18px 16px;margin-bottom:14px;cursor:pointer;transition:0.2s}
+.option:hover{border-color:#8458d8;background:#f9f6ff}
+.tip{text-align:center;margin-top:30px;color:#aaa;font-size:13px}
+</style>
 </head>
 <body>
-    <div class="progress-box">
-        <div class="progress-top">
-            <span>情绪测评</span>
-            <span id="pageNum">1/50</span>
-            <span id="per">0%</span>
-        </div>
-        <div class="progress-bg">
-            <div class="progress-active" id="progressBar"></div>
-        </div>
-    </div>
-
-    <div class="q-wrap">
-        <div class="q-title" id="question"></div>
-        <div id="optionsBox"></div>
-    </div>
-    <div class="tip">点击任意选项，自动进入下一题</div>
-
+<div class="progress-box">
+<div class="progress-top">
+<span>情绪测评</span>
+<span id="pageNum">1/50</span>
+<span id="per">0%</span>
+</div>
+<div class="progress-bg">
+<div class="progress-active" id="progressBar"></div>
+</div>
+</div>
+<div class="q-wrap">
+<div class="q-title" id="question"></div>
+<div id="optionsBox"></div>
+</div>
+<div class="tip">点击任意选项，自动进入下一题</div>
 <script>
-// 打开页面清空旧缓存，避免数据错乱
 localStorage.removeItem('scoreTotal');
 localStorage.removeItem('currentIndex');
-
-// 50道完整题库 A=1 B=2 C=3 D=4
-const questionList = [
-    {q:"别人随口一句负面评价，你会反复琢磨很久？",opt:["完全不会","偶尔会","经常会","一定会"]},
-    {q:"休息日你更愿意？",opt:["独处静养","和少数好友相处","应付社交但很累","频繁参加各种聚会"]},
-    {q:"拒绝别人的请求时，内心会愧疚不安？",opt:["毫无愧疚","轻微纠结","十分煎熬","根本不敢拒绝"]},
-    {q:"睡前习惯复盘白天所有言行，担心哪里做错？",opt:["从不复盘","偶尔回想","经常胡思乱想","夜夜内耗失眠"]},
-    {q:"你是否总下意识照顾他人情绪，忽略自己感受？",opt:["优先自我感受","兼顾双方","优先迁就别人","习惯性讨好所有人"]},
-    {q:"一件事情没做完，会焦虑到无法放松？",opt:["不会焦虑","轻微在意","坐立难安","极度焦虑"]},
-    {q:"很容易感知到别人细微的情绪变化？",opt:["感知迟钝","普通敏感度","高度敏感","共情过载"]},
-    {q:"害怕发生冲突，习惯性妥协退让？",opt:["坚持底线","合理让步","轻易妥协","无条件退让"]},
-    {q:"做完决定之后，反复怀疑自己选错了？",opt:["从不后悔","偶尔犹豫","经常推翻选择","持续自我否定"]},
-    {q:"朋友圈发动态，会反复编辑、删除重发？",opt:["随心发布","简单编辑","斟酌很久","编辑半天最后删掉"]},
-    {q:"被忽视时，会暗自难过、自我怀疑？",opt:["无所谓","轻微失落","情绪低落","反复纠结原因"]},
-    {q:"做计划必须完美，一点打乱就烦躁？",opt:["随性即可","可以微调","很难接受打乱","全盘崩溃"]},
-    {q:"总担心给别人添麻烦，尽量不开口求助？",opt:["正常求助","必要时求助","很少求助","绝不求助"]},
-    {q:"对比同龄人，容易产生自卑焦虑感？",opt:["很少对比","偶尔对比","经常内耗对比","严重自我否定"]},
-    {q:"他人的期待，会成为你的心理负担？",opt:["不受影响","轻微压力","压力很大","被期待束缚"]},
-    {q:"生气之后，会长时间消化负面情绪？",opt:["很快平复","半小时内平复","数小时平复","一两天都无法释怀"]},
-    {q:"害怕直白表达需求，担心惹人厌烦？",opt:["大胆表达","正常表述","委婉隐忍","完全压抑需求"]},
-    {q:"只要有空，脑子就会不由自主想烦心事？",opt:["不会","偶尔走神","思绪杂乱","持续精神内耗"]},
-    {q:"面对夸奖，你第一反应是？",opt:["坦然接受","礼貌感谢","觉得对方客套","认为自己不配"]},
-    {q:"与人争执后，反复回想话术，懊恼没吵赢？",opt:["翻篇不在意","短暂回想","持续懊恼","整夜复盘争执细节"]},
-    {q:"环境嘈杂混乱，会严重消耗你的精力？",opt:["毫无影响","轻微疲惫","消耗很大","极度烦躁疲惫"]},
-    {q:"习惯性预判所有最坏结果，提前焦虑？",opt:["乐观预判","正常思考风险","消极预判","灾难化预想"]},
-    {q:"不好意思拒绝推销、人情往来？",opt:["果断拒绝","礼貌拒绝","勉强接受","被迫妥协"]},
-    {q:"总觉得自己做得不够好，苛责自己？",opt:["接纳自我","偶尔自省","严苛要求自己","持续自我批判"]},
-    {q:"一段关系结束，最先反思全部过错在自己？",opt:["客观看待双方问题","理性反思自身","全盘归责自己","深度自我否定"]},
-    {q:"需要很长时间才能从负面事件走出来？",opt:["快速自愈","短期调整","愈合缓慢","长期深陷情绪"]},
-    {q:"担心自己的言行被他人背后议论？",opt:["毫不在意","轻微在意","十分忌惮","束手束脚"]},
-    {q:"为了维持和谐，压抑真实想法？",opt:["直言想法","选择性表达","经常压抑","完全隐藏本心"]},
-    {q:"等待消息时，频繁查看手机，内心焦灼？",opt:["佛系等待","偶尔翻看","频繁刷新","坐立不安"]},
-    {q:"设定目标没完成，就全盘否定自身价值？",opt:["失败但不否定自己","总结改进","自责很久","彻底否定自己"],
-    {q:"你是否容易心软，反复原谅伤害你的人？",opt:["坚守底线绝不原谅","有限度原谅","轻易心软原谅","无底线包容"],
-    {q:"做事之前，过度思虑所有细节不敢行动？",opt:["果断行动","简单规划后行动","思虑过度拖延","迟迟无法起步"],
-    {q:"别人一句冷淡的语气，你会胡思乱想半天？",opt:["不会多想","短暂留意","反复揣测对方心态","脑补无数负面剧情"],
-    {q:"害怕麻烦别人，也害怕别人麻烦自己？",opt:["正常互相麻烦","适度往来","刻意疏远社交","封闭自我"],
-    {q:"哪怕小事出错，也会极度愧疚自责？",opt:["平常心对待","简单改正即可","愧疚许久","反复责怪自己"],
-    {q:"在人群中，下意识观察所有人对你的看法？",opt:["专注自我","偶尔观察","时刻留意","高度警惕他人眼光"],
-    {q:"习惯提前思虑未来还未发生的麻烦？",opt:["活在当下","偶尔规划未来","杞人忧天","长期为未来焦虑"],
-    {q:"讨好他人之后，内心会空虚疲惫？",opt:["不会讨好别人","很少讨好","经常讨好后疲惫","习惯性讨好极度内耗"],
-    {q:"很难心安理得享受清闲，总觉得该忙碌？",opt:["安心躺平休息","劳逸结合","闲下来就焦虑","不敢放松片刻"],
-    {q:"被误解时，迫切想要解释澄清一切？",opt:["清者自清无需解释","简单解释一次","反复辩解证明自己","焦虑地不断解释"],
-    {q:"对他人的情绪感知敏锐，常常承接别人的负能量？",opt:["隔绝他人负面情绪","适度共情","吸收大量负能量","被他人情绪裹挟"],
-    {q:"制定的规则，只要别人打破，你就内心烦躁？",opt:["灵活变通","轻微不适","很难接受规则被打破","情绪剧烈波动"],
-    {q:"总下意识迎合对方的喜好，改变说话方式？",opt:["做真实的自己","小幅迁就","刻意迎合","完全伪装性格"],
-    {q:"深夜安静时，负面情绪会集中爆发？",opt:["深夜情绪平稳","偶尔emo","每晚情绪低落","深夜崩溃内耗"],
-    {q:"担心自己能力不足，不敢争取更好的机会？",opt:["主动争取","量力而行尝试","犹豫不敢报名","直接放弃机会"],
-    {q:"和别人对比生活，容易产生挫败感？",opt:["拒绝横向对比","理性看待差距","频繁对比自卑","陷入自我内耗循环"],
-    {q:"即便很累，也不好意思拒绝额外工作任务？",opt:["果断拒绝超负荷任务","合理推脱","勉强接手","全盘包揽"],
-    {q:"一件事做完，反复检查确认，害怕出错？",opt:["检查一次即可","简单核对","反复多次检查","强迫式校验"],
-    {q:"你经常因为思虑太多，导致失眠多梦？",opt:["睡眠质量很好","偶尔失眠","经常入睡困难","长期熬夜胡思乱想"],
-    {q:"总是为还没到来的事提前担忧，消耗当下？",opt:["专注当下生活","轻微担忧","持续性前置焦虑","提前承受所有压力"]},
-    {q:"你常常因为心软，不断降低自己的底线？",opt:["底线坚定不动摇","小幅让步","底线不断后退","完全没有边界"]}
+const questionList=[
+{"q":"别人随口一句负面评价，你会反复琢磨很久？","opt":["完全不会","偶尔会","经常会","一定会"]},
+{"q":"休息日你更愿意？","opt":["独处静养","和少数好友相处","应付社交但很累","频繁参加各种聚会"]},
+{"q":"拒绝别人的请求时，内心会愧疚不安？","opt":["毫无愧疚","轻微纠结","十分煎熬","根本不敢拒绝"]},
+{"q":"睡前习惯复盘白天所有言行，担心哪里做错？","opt":["从不复盘","偶尔回想","经常胡思乱想","夜夜内耗失眠"]},
+{"q":"你是否总下意识照顾他人情绪，忽略自己感受？","opt":["优先自我感受","兼顾双方","优先迁就别人","习惯性讨好所有人"]},
+{"q":"一件事情没做完，会焦虑到无法放松？","opt":["不会焦虑","轻微在意","坐立难安","极度焦虑"]},
+{"q":"很容易感知到别人细微的情绪变化？","opt":["感知迟钝","普通敏感度","高度敏感","共情过载"]},
+{"q":"害怕发生冲突，习惯性妥协退让？","opt":["坚持底线","合理让步","轻易妥协","无条件退让"]},
+{"q":"做完决定之后，反复怀疑自己选错了？","opt":["从不后悔","偶尔犹豫","经常推翻选择","持续自我否定"]},
+{"q":"朋友圈发动态，会反复编辑、删除重发？","opt":["随心发布","简单编辑","斟酌很久","编辑半天最后删掉"]},
+{"q":"被忽视时，会暗自难过、自我怀疑？","opt":["无所谓","轻微失落","情绪低落","反复纠结原因"]},
+{"q":"做计划必须完美，一点打乱就烦躁？","opt":["随性即可","可以微调","很难接受打乱","全盘崩溃"]},
+{"q":"总担心给别人添麻烦，尽量不开口求助？","opt":["正常求助","必要时求助","很少求助","绝不求助"]},
+{"q":"对比同龄人，容易产生自卑焦虑感？","opt":["很少对比","偶尔对比","经常内耗对比","严重自我否定"]},
+{"q":"他人的期待，会成为你的心理负担？","opt":["不受影响","轻微压力","压力很大","被期待束缚"]},
+{"q":"生气之后，会长时间消化负面情绪？","opt":["很快平复","半小时内平复","数小时平复","一两天都无法释怀"]},
+{"q":"害怕直白表达需求，担心惹人厌烦？","opt":["大胆表达","正常表述","委婉隐忍","完全压抑需求"]},
+{"q":"只要有空，脑子就会不由自主想烦心事？","opt":["不会","偶尔走神","思绪杂乱","持续精神内耗"]},
+{"q":"面对夸奖，你第一反应是？","opt":["坦然接受","礼貌感谢","觉得对方客套","认为自己不配"]},
+{"q":"与人争执后，反复回想话术，懊恼没吵赢？","opt":["翻篇不在意","短暂回想","持续懊恼","整夜复盘争执细节"]},
+{"q":"环境嘈杂混乱，会严重消耗你的精力？","opt":["毫无影响","轻微疲惫","消耗很大","极度烦躁疲惫"]},
+{"q":"习惯性预判所有最坏结果，提前焦虑？","opt":["乐观预判","正常思考风险","消极预判","灾难化预想"]},
+{"q":"不好意思拒绝推销、人情往来？","opt":["果断拒绝","礼貌拒绝","勉强接受","被迫妥协"]},
+{"q":"总觉得自己做得不够好，苛责自己？","opt":["接纳自我","偶尔自省","严苛要求自己","持续自我批判"]},
+{"q":"一段关系结束，最先反思全部过错在自己？","opt":["客观看待双方问题","理性反思自身","全盘归责自己","深度自我否定"]},
+{"q":"需要很长时间才能从负面事件走出来？","opt":["快速自愈","短期调整","愈合缓慢","长期深陷情绪"]},
+{"q":"担心自己的言行被他人背后议论？","opt":["毫不在意","轻微在意","十分忌惮","束手束脚"]},
+{"q":"为了维持和谐，压抑真实想法？","opt":["直言想法","选择性表达","经常压抑","完全隐藏本心"]},
+{"q":"等待消息时，频繁查看手机，内心焦灼？","opt":["佛系等待","偶尔翻看","频繁刷新","坐立不安"]},
+{"q":"设定目标没完成，就全盘否定自身价值？","opt":["失败但不否定自己","总结改进","自责很久","彻底否定自己"]},
+{"q":"你是否容易心软，反复原谅伤害你的人？","opt":["坚守底线绝不原谅","有限度原谅","轻易心软原谅","无底线包容"]},
+{"q":"做事之前，过度思虑所有细节不敢行动？","opt":["果断行动","简单规划后行动","思虑过度拖延","迟迟无法起步"]},
+{"q":"别人一句冷淡的语气，你会胡思乱想半天？","opt":["不会多想","短暂留意","反复揣测对方心态","脑补无数负面剧情"]},
+{"q":"害怕麻烦别人，也害怕别人麻烦自己？","opt":["正常互相麻烦","适度往来","刻意疏远社交","封闭自我"]},
+{"q":"哪怕小事出错，也会极度愧疚自责？","opt":["平常心对待","简单改正即可","愧疚许久","反复责怪自己"]},
+{"q":"在人群中，下意识观察所有人对你的看法？","opt":["专注自我","偶尔观察","时刻留意","高度警惕他人眼光"]},
+{"q":"习惯提前思虑未来还未发生的麻烦？","opt":["活在当下","偶尔规划未来","杞人忧天","长期为未来焦虑"]},
+{"q":"讨好他人之后，内心会空虚疲惫？","opt":["不会讨好别人","很少讨好","经常讨好后疲惫","习惯性讨好极度内耗"]},
+{"q":"很难心安理得享受清闲，总觉得该忙碌？","opt":["安心躺平休息","劳逸结合","闲下来就焦虑","不敢放松片刻"]},
+{"q":"被误解时，迫切想要解释澄清一切？","opt":["清者自清无需解释","简单解释一次","反复辩解证明自己","焦虑地不断解释"]},
+{"q":"对他人的情绪感知敏锐，常常承接别人的负能量？","opt":["隔绝他人负面情绪","适度共情","吸收大量负能量","被他人情绪裹挟"]},
+{"q":"制定的规则，只要别人打破，你就内心烦躁？","opt":["灵活变通","轻微不适","很难接受规则被打破","情绪剧烈波动"]},
+{"q":"总下意识迎合对方的喜好，改变说话方式？","opt":["做真实的自己","小幅迁就","刻意迎合","完全伪装性格"]},
+{"q":"深夜安静时，负面情绪会集中爆发？","opt":["深夜情绪平稳","偶尔emo","每晚情绪低落","深夜崩溃内耗"]},
+{"q":"担心自己能力不足，不敢争取更好的机会？","opt":["主动争取","量力而行尝试","犹豫不敢报名","直接放弃机会"]},
+{"q":"和别人对比生活，容易产生挫败感？","opt":["拒绝横向对比","理性看待差距","频繁对比自卑","陷入自我内耗循环"]},
+{"q":"即便很累，也不好意思拒绝额外工作任务？","opt":["果断拒绝超负荷任务","合理推脱","勉强接手","全盘包揽"]},
+{"q":"一件事做完，反复检查确认，害怕出错？","opt":["检查一次即可","简单核对","反复多次检查","强迫式校验"]},
+{"q":"你经常因为思虑太多，导致失眠多梦？","opt":["睡眠质量很好","偶尔失眠","经常入睡困难","长期熬夜胡思乱想"]},
+{"q":"总是为还没到来的事提前担忧，消耗当下？","opt":["专注当下生活","轻微担忧","持续性前置焦虑","提前承受所有压力"]},
+{"q":"你常常因为心软，不断降低自己的底线？","opt":["底线坚定不动摇","小幅让步","底线不断后退","完全没有边界"]}
 ];
-
-let scoreTotal = 0;
-let currentIndex = 0;
-const totalNum = questionList.length;
-
-// 渲染题目函数
+let scoreTotal=0;
+let currentIndex=0;
+const totalNum=questionList.length;
 function render(){
-    const item = questionList[currentIndex];
-    document.getElementById('question').innerText = item.q;
-    let html = '';
-    item.opt.forEach((opt,idx)=>{
-        html += `<div class="option" onclick="selectAnswer(${idx+1})">${String.fromCharCode(65+idx)}、${opt}</div>`
-    })
-    document.getElementById('optionsBox').innerHTML = html;
-    const per = ((currentIndex+1)/totalNum*100).toFixed(1);
-    document.getElementById('pageNum').innerText = `${currentIndex+1}/${totalNum}`;
-    document.getElementById('per').innerText = per+'%';
-    document.getElementById('progressBar').style.width = per+'%';
+const item=questionList[currentIndex];
+document.getElementById('question').innerText=item.q;
+let html='';
+item.opt.forEach((opt,idx)=>{html+=`<div class="option" onclick="selectAnswer(${idx+1})">${String.fromCharCode(65+idx)}、${opt}</div>`;});
+document.getElementById('optionsBox').innerHTML=html;
+const per=((currentIndex+1)/totalNum*100).toFixed(1);
+document.getElementById('pageNum').innerText=`${currentIndex+1}/${totalNum}`;
+document.getElementById('per').innerText=per+'%';
+document.getElementById('progressBar').style.width=per+'%';
 }
-
-// 选择答案跳转逻辑
 function selectAnswer(score){
-    scoreTotal += score;
-    currentIndex++;
-    localStorage.setItem('scoreTotal',scoreTotal);
-    localStorage.setItem('currentIndex',currentIndex);
-    if(currentIndex >= totalNum){
-        window.location.href = "result.html";
-    }else{
-        render();
-    }
+scoreTotal+=score;
+currentIndex++;
+localStorage.setItem('scoreTotal',scoreTotal);
+localStorage.setItem('currentIndex',currentIndex);
+if(currentIndex>=totalNum){window.location.href="result.html";}else{render();}
 }
-
-// 页面加载完成执行渲染
 render();
 </script>
 </body>
