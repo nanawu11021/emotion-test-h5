@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>20题答题页</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:PingFang SC}
+body{background:#1c1a29;color:#f1f1f1;min-height:100vh;padding:20px;max-width:640px;margin:0 auto}
+.progress{height:6px;background:#2d2a3f;border-radius:99px;margin-bottom:24px}
+.pro-inner{height:100%;background:#a07eff;border-radius:99px;width:0%}
+.q-num{color:#c4b8ee;font-size:14px;margin-bottom:8px}
+.q-text{font-size:17px;line-height:1.6;margin-bottom:22px}
+.opt{padding:14px 16px;border:1px solid #494366;border-radius:12px;margin:10px 0;cursor:pointer}
+.opt:hover{background:#342f4c}
+.opt.active{border-color:#a07eff;background:#3b3458}
+.btns{display:flex;gap:12px;margin-top:30px}
+.btns button{flex:1;padding:14px;border-radius:12px;border:none;font-size:16px}
+#prev{background:#333047;color:#ccc}
+#next{background:#8b6cd2;color:#fff}
+</style>
+</head>
+<body>
+<div class="progress"><div class="pro-inner" id="bar"></div></div>
+<div id="qBox"></div>
+<div class="btns">
+    <button id="prev" onclick="prev()">上一题</button>
+    <button id="next" onclick="next()">下一题</button>
+</div>
+
+<script>
+let current = 0;
+const total = 20;
+let score = Array(total).fill(0);
+const list = [
+    {q:"1.他人一句负面评价，你会反复回想很久吗？",opts:["会，失眠胡思乱想","半天难以释怀","短暂在意很快忘记","完全不放在心上"],v:[4,3,2,1]},
+    {q:"2.事情还没发生，你总提前预想最坏结果？",opts:["经常焦虑脑补灾难","忍不住担忧很久","偶尔担心不影响生活","顺其自然不预判"],v:[4,3,2,1]},
+    {q:"3.别人请求帮忙，你很难拒绝，怕对方不高兴？",opts:["百分百妥协讨好","勉强答应委屈自己","合理拒绝不内疚","优先自身感受直接拒绝"],v:[4,3,2,1]},
+    {q:"4.深夜躺下后，大脑会不受控制疯狂乱想？",opts:["每天深夜重度内耗失眠","经常翻来覆去思虑","偶尔胡思乱想","躺下快速放空入睡"],v:[4,3,2,1]},
+    {q:"5.和人产生矛盾后，总全部归咎于自己？",opts:["疯狂自我反省自责","纠结很久不敢沟通","客观分清对错","就事论事不内耗"],v:[4,3,2,1]},
+    {q:"6.你习惯牺牲自己需求成全别人吗？",opts:["习惯性牺牲自我","经常妥协让步","分情况适度迁就","绝不委屈自己"],v:[4,3,2,1]},
+    {q:"7.独处安静时，负面情绪会自动涌上来？",opts:["无时无刻陷入低落","很容易陷入负面回忆","能快速转移注意力","独处是放松治愈"],v:[4,3,2,1]},
+    {q:"8.害怕冲突，遇事优先选择隐忍退让？",opts:["极度害怕冲突一味退让","尽量避免争吵隐忍","合理表达自身立场","敢于直面矛盾沟通"],v:[4,3,2,1]},
+    {q:"9.一点小事没做好，会持续自我否定？",opts:["长期自我怀疑否定","低落很久走不出来","短暂失落快速调整","允许自己犯错"],v:[4,3,2,1]},
+    {q:"10.他人情绪好坏，会严重牵动你的心情？",opts:["完全被他人情绪裹挟","容易共情过度消耗","适度共情保持距离","不受他人情绪影响"],v:[4,3,2,1]},
+    {q:"11.你很难主动向别人倾诉负面情绪？",opts:["全部独自硬扛","很难开口求助","合适的人会倾诉","愿意主动释放情绪"],v:[4,3,2,1]},
+    {q:"12.总担心自己言行让别人不舒服？",opts:["时时刻刻小心翼翼","说话反复斟酌","正常表达不刻意讨好","不在意他人看法"],v:[4,3,2,1]},
+    {q:"13.睡前反复复盘今天所有尴尬、不愉快的事？",opts:["每晚反复折磨自己","经常睡前复盘内耗","偶尔回想不纠结","从不复盘过往小事"],v:[4,3,2,1]},
+    {q:"14.即便不舒服，也很难主动提需求？",opts:["永远压抑自身需求","不好意思开口索取","温和表达诉求","大胆说出自身需求"],v:[4,3,2,1]},
+    {q:"15.遭遇挫折后，恢复心态需要很久？",opts:["几周走不出低谷","几天持续低落","一天左右调整完毕","快速自愈恢复状态"],v:[4,3,2,1]},
+    {q:"16.社交中，总刻意维持完美形象？",opts:["全程伪装不敢真实","刻意讨好迎合他人","适度展示真实自我","完全不在意他人眼光"],v:[4,3,2,1]},
+    {q:"17.空闲无事时，焦虑感会自动加重？",opts:["一空下来就焦虑心慌","闲下来容易胡思乱想","空闲可以放松休息","独处是充电时刻"],v:[4,3,2,1]},
+    {q:"18.别人随口一句批评，会记很久？",opts:["长久铭记反复难受","几天内心耿耿于怀","听过就放下不纠结","完全左耳进右耳出"],v:[4,3,2,1]},
+    {q:"19.你习惯优先照顾所有人，忽略自己感受？",opts:["永远把自己放最后","经常牺牲自身感受","兼顾他人与自己","自我感受永远第一"],v:[4,3,2,1]},
+    {q:"20.压力大时，你容易陷入长久精神内耗吗？",opts:["重度内耗无法行动","持续低落消耗精力","短暂焦虑可调节","几乎不会内耗焦虑"],v:[4,3,2,1]}
+];
+
+function render(){
+    const item = list[current];
+    let html = `<p class="q-num">第${current+1}题 / 共${total}题</p><p class="q-text">${item.q}</p>`;
+    for(let i=0;i<4;i++){
+        let act = score[current] === item.v[i] ? "active" : "";
+        html += `<div class="opt ${act}" onclick="pick(${item.v[i]})">${item.opts[i]}</div>`;
+    }
+    document.getElementById("qBox").innerHTML = html;
+    document.getElementById("bar").style.width = ((current+1)/total*100)+"%";
+    document.getElementById("prev").style.display = current===0 ? "none" : "flex";
+    document.getElementById("next").innerText = current===total-1 ? "查看完整报告" : "下一题";
+}
+function pick(v){
+    score[current] = v;
+    render();
+}
+function prev(){
+    if(current>0){current--;render()}
+}
+function next(){
+    if(score[current]===0){alert("请选择一个答案");return}
+    if(current < total-1){
+        current++;render();
+    }else{
+        localStorage.setItem("testScore",JSON.stringify(score));
+        location.href = "result.html";
+    }
+}
+render();
+</script>
+</body>
+</html>
