@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>恋爱20题答题页</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:PingFang SC}
+body{background:#291c26;color:#f1f1f1;min-height:100vh;padding:20px;max-width:640px;margin:0 auto}
+.progress{height:6px;background:#3f2a39;border-radius:99px;margin-bottom:24px}
+.pro-inner{height:100%;background:#dd5588;border-radius:99px;width:0%}
+.q-num{color:#e8b2cd;font-size:14px;margin-bottom:8px}
+.q-text{font-size:17px;line-height:1.6;margin-bottom:22px}
+.opt{padding:14px 16px;border:1px solid #603c54;border-radius:12px;margin:10px 0;cursor:pointer}
+.opt:hover{background:#483040}
+.opt.active{border-color:#dd5588;background:#4f3446}
+.btns{display:flex;gap:12px;margin-top:30px}
+.btns button{flex:1;padding:14px;border-radius:12px;border:none;font-size:16px}
+#prev{background:#3f2a39;color:#ccc}
+#next{background:#dd5588;color:#fff}
+</style>
+</head>
+<body>
+<div class="progress"><div class="pro-inner" id="bar"></div></div>
+<div id="qBox"></div>
+<div class="btns">
+    <button id="prev" onclick="prev()">上一题</button>
+    <button id="next" onclick="next()">下一题</button>
+</div>
+
+<script>
+let current = 0;
+const total = 20;
+let score = Array(total).fill(0);
+const list = [
+    {q:"1.对方半天不回消息，你会胡思乱想很久？",opts:["极度不安疯狂脑补","心里失落反复看手机","轻微在意先忙自己","完全不在意"],v:[4,3,2,1]},
+    {q:"2.吵架冷战时，你害怕对方会离开你？",opts:["极度恐惧主动妥协","委屈等待对方哄","冷静沟通解决问题","不合适就分开"],v:[4,3,2,1]},
+    {q:"3.你愿意毫无保留为另一半付出？",opts:["全部优先对方牺牲自己","愿意付出期待同等回应","互相迁就保留边界","先爱自己再爱人"],v:[4,3,2,1]},
+    {q:"4.伴侣有要好异性朋友，你会吃醋难受？",opts:["完全不能接受极度焦虑","暗自难过介意不已","保持分寸选择信任","完全尊重不干涉"],v:[4,3,2,1]},
+    {q:"5.感情很累时，你舍不得放手硬撑？",opts:["再痛苦也不愿分开","反复犹豫舍不得回忆","尽力修复不行就放手","及时止损绝不内耗"],v:[4,3,2,1]},
+    {q:"6.你总需要对方频繁报备行踪？",opts:["每时每刻都要知晓","经常想要确认行踪","偶尔关心不强制","完全给对方自由"],v:[4,3,2,1]},
+    {q:"7.对方稍微冷淡，你就自我怀疑被不爱？",opts:["立刻陷入自我否定","心情低落很久","短暂失落很快调整","不会过度解读"],v:[4,3,2,1]},
+    {q:"8.恋爱后你会主动放弃自己社交圈？",opts:["几乎断绝所有朋友","减少大部分社交","保留原有社交生活","社交完全不受影响"],v:[4,3,2,1]},
+    {q:"9.你习惯迎合对方喜好改变自己？",opts:["完全改变迎合对方","经常妥协迁就","适度迁就保留自我","绝不改变本心"],v:[4,3,2,1]},
+    {q:"10.分开后你会长时间走不出失恋？",opts:["数月沉浸悲伤无法自拔","几周持续难过","几天调整恢复状态","快速走出迎接新生活"],v:[4,3,2,1]},
+    {q:"11.你不敢主动向对方表达负面情绪？",opts:["全部独自压抑隐忍","很难开口怕对方反感","合适时机坦诚沟通","直接说出内心感受"],v:[4,3,2,1]},
+    {q:"12.你会翻看对方手机寻找安全感？",opts:["经常偷偷翻看查看","偶尔忍不住翻看","完全不会翻看手机","信任从不怀疑"],v:[4,3,2,1]},
+    {q:"13.你害怕和伴侣发生冲突选择隐忍？",opts:["一味退让避免争吵","尽量减少矛盾冲突","主动沟通化解分歧","直面矛盾不回避"],v:[4,3,2,1]},
+    {q:"14.你会把人生全部期待寄托在伴侣身上？",opts:["人生全部重心是对方","大部分期待放在感情","感情只是生活一部分","自我才是人生核心"],v:[4,3,2,1]},
+    {q:"15.对方和异性正常聊天你会生气？",opts:["立刻暴怒内心刺痛","暗自生气很久","完全信任不介意","觉得十分正常"],v:[4,3,2,1]},
+    {q:"16.你能接受异地恋长期不见面？",opts:["完全无法忍受异地","很难坚持容易崩溃","可以坚持适度沟通","享受独立相处时光"],v:[4,3,2,1]},
+    {q:"17.你会下意识讨好伴侣避免吵架？",opts:["习惯性委屈自己讨好","经常妥协让步","合理表达自身想法","不会刻意讨好任何人"],v:[4,3,2,1]},
+    {q:"18.你很容易因为对方一句话失眠？",opts:["经常整夜失眠思虑","半夜反复回想难受","短暂失落不影响睡眠","听完直接放下"],v:[4,3,2,1]},
+    {q:"19.恋爱中你很难拥有独处空间？",opts:["时时刻刻想要黏在一起","希望大部分时间相伴","各自拥有独立空间","偏爱独处互不打扰"],v:[4,3,2,1]},
+    {q:"20.一段消耗你的感情，你能果断抽身吗？",opts:["很难割舍持续内耗","犹豫很久难以决断","权衡后体面分开","立刻止损绝不回头"],v:[4,3,2,1]}
+];
+
+function render(){
+    const item = list[current];
+    let html = `<p class="q-num">第${current+1}题 / 共${total}题</p><p class="q-text">${item.q}</p>`;
+    for(let i=0;i<4;i++){
+        let act = score[current] === item.v[i] ? "active" : "";
+        html += `<div class="opt ${act}" onclick="pick(${item.v[i]})">${item.opts[i]}</div>`;
+    }
+    document.getElementById("qBox").innerHTML = html;
+    document.getElementById("bar").style.width = ((current+1)/total*100)+"%";
+    document.getElementById("prev").style.display = current===0 ? "none" : "flex";
+    document.getElementById("next").innerText = current===total-1 ? "查看完整报告" : "下一题";
+}
+function pick(v){
+    score[current] = v;
+    render();
+}
+function prev(){
+    if(current>0){current--;render()}
+}
+function next(){
+    if(score[current]===0){alert("请选择一个答案");return}
+    if(current < total-1){
+        current++;render();
+    }else{
+        localStorage.setItem("loveScore",JSON.stringify(score));
+        location.href = "result.html";
+    }
+}
+render();
+</script>
+</body>
+</html>
