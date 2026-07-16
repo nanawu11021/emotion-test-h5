@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>原生内心人格深度测评</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:PingFang SC,system-ui,-apple-system}
+body{background:#1c1a29;color:#f1f1f1;min-height:100vh;padding:20px;max-width:640px;margin:0 auto}
+.main-box{padding:24px 16px}
+.title{font-size:24px;text-align:center;margin-bottom:10px;color:#e8dfff}
+.desc{font-size:14px;color:#b8b2d1;text-align:center;line-height:1.7;margin-bottom:30px}
+/* 验证码页面 */
+.verify-wrap{display:block}
+.test-wrap{display:none}
+.result-wrap{display:none}
+.code-input{display:flex;gap:10px;justify-content:center;margin:25px 0}
+.code-input input{
+    width:50px;height:60px;font-size:24px;text-align:center;
+    background:#2d2a3f;border:1px solid #8b78c7;border-radius:10px;
+    color:#fff;outline:none
+}
+.tip-text{text-align:center;color:#a098c2;font-size:13px;margin-bottom:30px}
+.start-btn{
+    width:100%;padding:15px;background:#8b6cd2;border:none;
+    border-radius:12px;color:#fff;font-size:16px;cursor:pointer
+}
+/* 测评页面 */
+.progress-bar{height:6px;background:#2d2a3f;border-radius:99px;margin-bottom:24px}
+.pro-inner{height:100%;background:#a07eff;border-radius:99px;width:0%}
+.q-num{color:#c4b8ee;font-size:14px;margin-bottom:8px}
+.q-content{font-size:17px;line-height:1.6;margin-bottom:22px}
+.opt-item{
+    padding:14px 16px;border:1px solid #494366;border-radius:12px;
+    margin:10px 0;cursor:pointer;transition:0.2s
+}
+.opt-item:hover{background:#342f4c}
+.opt-item.active{border-color:#a07eff;background:#3b3458}
+.btn-row{display:flex;gap:12px;margin-top:30px}
+.btn-row button{flex:1;padding:14px;border-radius:12px;border:none;font-size:16px}
+#prev{background:#333047;color:#ccc}
+#next{background:#8b6cd2;color:#fff}
+/* 结果页 */
+.result-title{font-size:22px;text-align:center;margin-bottom:16px;color:#e8dfff}
+.dimension{margin:18px 0}
+.dim-name{font-size:15px;margin-bottom:6px;color:#d3c8f5}
+.dim-bar{height:8px;background:#2d2a3f;border-radius:99px}
+.dim-fill{height:100%;background:#a07eff;border-radius:99px}
+.res-text{line-height:1.8;color:#d8d2f0;margin:24px 0;font-size:15px}
+.reset-btn{width:100%;padding:15px;background:#8b6cd2;border:none;border-radius:12px;color:#fff;font-size:16px}
+</style>
+</head>
+<body>
+<div class="main-box">
+    <!-- 验证码校验页（和你现有页面一致） -->
+    <div class="verify-wrap" id="verifyBox">
+        <h1 class="title">原生内心人格深度测评</h1>
+        <p class="desc">
+            20道专业心理选择题，测出你的边界感、自愈力、讨好型人格、深夜焦虑、精神内耗五大内心维度
+        </p>
+        <div class="code-input">
+            <input maxlength="1" oninput="inputCode(0)" id="c0">
+            <input maxlength="1" oninput="inputCode(1)" id="c1">
+            <input maxlength="1" oninput="inputCode(2)" id="c2">
+            <input maxlength="1" oninput="inputCode(3)" id="c3">
+        </div>
+        <p class="tip-text">4位数字专属验证码（任意4位数字均可进入测试）</p>
+        <button class="start-btn" onclick="checkCode()">验证并开始测评</button>
+        <p style="text-align:center;margin-top:20px;font-size:12px;color:#888">仅供趣味心理测评，不具备专业医疗诊断作用</p>
+    </div>
+
+    <!-- 20题测评区域 -->
+    <div class="test-wrap" id="testBox">
+        <div class="progress-bar"><div class="pro-inner" id="bar"></div></div>
+        <div id="qContainer"></div>
+        <div class="btn-row">
+            <button id="prev" onclick="prevQuestion()">上一题</button>
+            <button id="next" onclick="nextQuestion()">下一题</button>
+        </div>
+    </div>
+
+    <!-- 结果展示页 -->
+    <div class="result-wrap" id="resBox">
+        <h2 class="result-title">你的内心人格完整报告</h2>
+        <div class="dimension">
+            <p class="dim-name">精神内耗指数</p>
+            <div class="dim-bar"><div class="dim-fill" id="d1"></div></div>
+        </div>
+        <div class="dimension">
+            <p class="dim-name">自我边界感</p>
+            <div class="dim-bar"><div class="dim-fill" id="d2"></div></div>
+        </div>
+        <div class="dimension">
+            <p class="dim-name">情绪自愈能力</p>
+            <div class="dim-bar"><div class="dim-fill" id="d3"></div></div>
+        </div>
+        <div class="dimension">
+            <p class="dim-name">深夜焦虑程度</p>
+            <div class="dim-bar"><div class="dim-fill" id="d4"></div></div>
+        </div>
+        <div class="dimension">
+            <p class="dim-name">讨好型人格倾向</p>
+            <div class="dim-bar"><div class="dim-fill" id="d5"></div></div>
+        </div>
+        <p class="res-text" id="reportText"></p>
+        <button class="reset-btn" onclick="resetAll()">重新测评</button>
+    </div>
+</div>
+
+<script>
+// 全局变量
+let currentQ = 0;
+const totalQ = 20;
+let scoreArr = Array(totalQ).fill(0);
+// 20道题目，每题4个选项，分值对应五个维度
+const questionList = [
+    {q:"1.他人一句负面评价，你会反复回想很久吗？",opts:[{t:"会，失眠胡思乱想",v:4},{t:"半天难以释怀",v:3},{t:"短暂在意很快忘记",v:2},{t:"完全不放在心上",v:1}]},
+    {q:"2.还没发生的事，你总提前预想最坏结果？",opts:[{t:"经常焦虑脑补灾难",v:4},{t:"忍不住担忧很久",v:3},{t:"偶尔担心不影响生活",v:2},{t:"顺其自然不预判",v:1}]},
+    {q:"3.别人请求帮忙，你很难拒绝，怕对方不开心？",opts:[{t:"百分百妥协讨好",v:4},{t:"勉强答应委屈自己",v:3},{t:"合理拒绝不内疚",v:2},{t:"优先自身感受直接拒绝",v:1}]},
+    {q:"4.深夜躺下后，大脑会不受控制疯狂乱想？",opts:[{t:"每天深夜重度内耗失眠",v:4},{t:"经常翻来覆去思虑",v:3},{t:"偶尔胡思乱想",v:2},{t:"躺下快速放空入睡",v:1}]},
+    {q:"5.和人产生矛盾后，总全部归咎于自己？",opts:[{t:"疯狂自我反省自责",v:4},{t:"纠结很久不敢沟通",v:3},{t:"客观分清对错",v:2},{t:"就事论事不内耗",v:1}]},
+    {q:"6.你习惯牺牲自己需求成全别人吗？",opts:[{t:"习惯性牺牲自我",v:4},{t:"经常妥协让步",v:3},{t:"分情况适度迁就",v:2},{t:"绝不委屈自己",v:1}]},
+    {q:"7.独处安静时，负面情绪会自动涌上来？",opts:[{t:"无时无刻陷入低落",v:4},{t:"很容易陷入负面回忆",v:3},{t:"能快速转移注意力",v:2},{t:"独处是放松治愈",v:1}]},
+    {q:"8.害怕冲突，遇事优先选择隐忍退让？",opts:[{t:"极度害怕冲突一味退让",v:4},{t:"尽量避免争吵隐忍",v:3},{t:"合理表达自身立场",v:2},{t:"敢于直面矛盾沟通",v:1}]},
+    {q:"9.一点小事没做好，会持续自我否定？",opts:[{t:"长期自我怀疑否定",v:4},{t:"低落很久走不出来",v:3},{t:"短暂失落快速调整",v:2},{t:"允许自己犯错",v:1}]},
+    {q:"10.他人情绪好坏，会严重牵动你的心情？",opts:[{t:"完全被他人情绪裹挟",v:4},{t:"容易共情过度消耗",v:3},{t:"适度共情保持距离",v:2},{t:"不受他人情绪影响",v:1}]},
+    {q:"11.你很难主动向别人倾诉负面情绪？",opts:[{t:"全部独自硬扛",v:4},{t:"很难开口求助",v:3},{t:"合适的人会倾诉",v:2},{t:"愿意主动释放情绪",v:1}]},
+    {q:"12.总担心自己言行让别人不舒服？",opts:[{t:"时时刻刻小心翼翼",v:4},{t:"说话反复斟酌",v:3},{t:"正常表达不刻意讨好",v:2},{t:"不在意他人看法",v:1}]},
+    {q:"13.睡前反复复盘今天所有尴尬、不愉快的事？",opts:[{t:"每晚反复折磨自己",v:4},{t:"经常睡前复盘内耗",v:3},{t:"偶尔回想不纠结",v:2},{t:"从不复盘过往小事",v:1}]},
+    {q:"14.即便不舒服，也很难主动提需求？",opts:[{t:"永远压抑自身需求",v:4},{t:"不好意思开口索取",v:3},{t:"温和表达诉求",v:2},{t:"大胆说出自身需求",v:1}]},
+    {q:"15.遭遇挫折后，恢复心态需要很久？",opts:[{t:"几周走不出低谷",v:4},{t:"几天持续低落",v:3},{t:"一天左右调整完毕",v:2},{t:"快速自愈恢复状态",v:1}]},
+    {q:"16.朋友圈或者社交中，总刻意维持完美形象？",opts:[{t:"全程伪装不敢真实",v:4},{t:"刻意讨好迎合他人",v:3},{t:"适度展示真实自我",v:2},{t:"完全不在意他人眼光",v:1}]},
+    {q:"17.空闲无事时，焦虑感会自动加重？",opts:[{t:"一空下来就焦虑心慌",v:4},{t:"闲下来容易胡思乱想",v:3},{t:"空闲可以放松休息",v:2},{t:"独处是充电时刻",v:1}]},
+    {q:"18.别人随口一句批评，会记很久？",opts:[{t:"长久铭记反复难受",v:4},{t:"几天内心耿耿于怀",v:3},{t:"听过就放下不纠结",v:2},{t:"完全左耳进右耳出",v:1}]},
+    {q:"19.你习惯优先照顾所有人，忽略自己感受？",opts:[{t:"永远把自己放最后",v:4},{t:"经常牺牲自身感受",v:3},{t:"兼顾他人与自己",v:2},{t:"自我感受永远第一",v:1}]},
+    {q:"20.压力大时，你容易陷入长久精神内耗吗？",opts:[{t:"重度内耗无法行动",v:4},{t:"持续低落消耗精力",v:3},{t:"短暂焦虑可调节",v:2},{t:"几乎不会内耗焦虑",v:1}]}
+];
+
+// 验证码输入联动
+const codeInputs = [document.getElementById('c0'),document.getElementById('c1'),document.getElementById('c2'),document.getElementById('c3')];
+function inputCode(idx){
+    let val = codeInputs[idx].value.replace(/[^\d]/g,'');
+    codeInputs[idx].value = val;
+    if(val.length>=1 && idx<3) codeInputs[idx+1].focus();
+}
+// 验证码校验：任意4位数字即可进入
+function checkCode(){
+    let fullCode = codeInputs[0].value + codeInputs[1].value + codeInputs[2].value + codeInputs[3].value;
+    if(fullCode.length!==4){
+        alert("请输入完整4位数字验证码");
+        return;
+    }
+    // 切换页面
+    document.getElementById('verifyBox').style.display = 'none';
+    document.getElementById('testBox').style.display = 'block';
+    renderQuestion();
+}
+
+// 渲染当前题目
+function renderQuestion(){
+    const item = questionList[currentQ];
+    let html = `<p class="q-num">第${currentQ+1}题 / 共${totalQ}题</p><p class="q-content">${item.q}</p>`;
+    item.opts.forEach((opt,i)=>{
+        let active = scoreArr[currentQ] === opt.v ? 'active' : '';
+        html += `<div class="opt-item ${active}" onclick="selectOpt(${opt.v})">${opt.t}</div>`;
+    })
+    document.getElementById('qContainer').innerHTML = html;
+    // 更新进度条
+    let pct = ((currentQ+1)/totalQ)*100;
+    document.getElementById('bar').style.width = pct+'%';
+    // 修改下一题文字
+    let nextBtn = document.getElementById('next');
+    if(currentQ === totalQ-1){
+        nextBtn.innerText = "查看完整报告";
+    }else{
+        nextBtn.innerText = "下一题";
+    }
+    // 第一题隐藏上一题
+    document.getElementById('prev').style.display = currentQ===0 ? 'none' : 'flex';
+}
+
+// 选择选项计分
+function selectOpt(val){
+    scoreArr[currentQ] = val;
+    renderQuestion();
+}
+
+// 上一题
+function prevQuestion(){
+    if(currentQ>0){
+        currentQ--;
+        renderQuestion();
+    }
+}
+// 下一题 / 提交出结果
+function nextQuestion(){
+    if(scoreArr[currentQ]===0){
+        alert("请选择一个选项再继续");
+        return;
+    }
+    if(currentQ < totalQ-1){
+        currentQ++;
+        renderQuestion();
+    }else{
+        calcResult();
+    }
+}
+
+// 计算五大维度分数
+function calcResult(){
+    let sumAll = scoreArr.reduce((a,b)=>a+b,0);
+    let maxTotal = totalQ*4;
+    // 五个维度百分比
+    let innerWaste = Math.round((sumAll/maxTotal)*100); //内耗
+    let boundary = 100 - innerWaste; //边界感反向
+    let heal = boundary; //自愈力和边界正相关
+    let nightAnx = innerWaste; //深夜焦虑同内耗
+    let peoplePlease = innerWaste; //讨好型同内耗
+
+    // 填充进度条
+    document.getElementById('d1').style.width = innerWaste+'%';
+    document.getElementById('d2').style.width = boundary+'%';
+    document.getElementById('d3').style.width = heal+'%';
+    document.getElementById('d4').style.width = nightAnx+'%';
+    document.getElementById('d5').style.width = peoplePlease+'%';
+
+    // 生成报告文案
+    let text = "";
+    if(innerWaste >=70){
+        text = `你的精神内耗等级：重度\n你属于高敏感、高讨好型人格，极易深夜焦虑。习惯自我反思、迁就他人，常常压抑自身需求，小事反复复盘消耗大量情绪能量。自我边界极弱，不懂拒绝，自愈速度很慢，长期容易身心疲惫。建议减少过度共情，学会优先照顾自己的感受，建立清晰人际边界。`;
+    }else if(innerWaste >=45){
+        text = `你的精神内耗等级：中度\n你共情力很强，容易被他人情绪影响，偶尔讨好迁就别人，深夜容易胡思乱想焦虑。拥有一定自愈能力，但遇事容易往坏处脑补，会反复纠结过往不愉快。可以练习适当拒绝，减少不必要的自我反思，降低思虑。`;
+    }else{
+        text = `你的精神内耗等级：轻度松弛型\n你拥有稳定清晰的自我边界，很少讨好别人，钝感力充足。深夜不易焦虑，情绪自愈速度很快，不会为他人的评价、小事反复内耗。懂得自爱，能够合理划分自己与他人的情绪，心态松弛稳定。`;
+    }
+    document.getElementById('reportText').innerText = text;
+
+    // 切换到结果页
+    document.getElementById('testBox').style.display = 'none';
+    document.getElementById('resBox').style.display = 'block';
+}
+
+// 全部重置回到验证码页
+function resetAll(){
+    currentQ = 0;
+    scoreArr = Array(totalQ).fill(0);
+    codeInputs.forEach(input=>input.value='');
+    document.getElementById('resBox').style.display = 'none';
+    document.getElementById('testBox').style.display = 'none';
+    document.getElementById('verifyBox').style.display = 'block';
+}
+</script>
+</body>
+</html>
