@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>20题深度内心人格测评</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:PingFang SC,system-ui}
+body{background:#1c1a29;color:#f1f1f1;min-height:100vh;padding:20px;max-width:640px;margin:0 auto}
+.box{padding:30px 16px}
+h1{font-size:24px;text-align:center;color:#e8dfff;margin-bottom:12px}
+.desc{text-align:center;color:#b8b2d1;font-size:14px;line-height:1.7;margin-bottom:36px}
+.code-box{display:flex;gap:10px;justify-content:center;margin-bottom:20px}
+.code-box input{
+    width:54px;height:64px;font-size:26px;text-align:center;
+    background:#2d2a3f;border:1px solid #8b78c7;border-radius:10px;
+    color:#fff;border:none;outline:none
+}
+.tip{text-align:center;color:#a098c2;font-size:13px;margin-bottom:32px}
+.start-btn{
+    width:100%;padding:16px;background:#8b6cd2;border:none;border-radius:12px;
+    color:#fff;font-size:16px;cursor:pointer
+}
+.footer-text{margin-top:24px;text-align:center;font-size:12px;color:#777}
+</style>
+</head>
+<body>
+<div class="box">
+    <h1>20题深度内心人格测评</h1>
+    <p class="desc">20道专业心理选择题，测出你的精神内耗、边界感、自愈力、深夜焦虑、讨好人格五大维度</p>
+    <div class="code-box">
+        <input maxlength="1" id="c0" oninput="nextInput(0)">
+        <input maxlength="1" id="c1" oninput="nextInput(1)">
+        <input maxlength="1" id="c2" oninput="nextInput(2)">
+        <input maxlength="1" id="c3" oninput="nextInput(3)">
+    </div>
+    <p class="tip">输入4位数字验证码即可进入测评</p>
+    <button class="start-btn" onclick="checkCode()">验证并查看测评介绍</button>
+    <p class="footer-text">趣味心理测试，不具备专业医疗诊断效力</p>
+</div>
+<script>
+const inputs = [c0,c1,c2,c3];
+function nextInput(i){
+    inputs[i].value = inputs[i].value.replace(/[^\d]/g,'');
+    if(inputs[i].value && i<3) inputs[i+1].focus();
+}
+function checkCode(){
+    let code = inputs[0].value+inputs[1].value+inputs[2].value+inputs[3].value;
+    if(code.length!==4){
+        alert("请填写完整4位数字");
+        return;
+    }
+    location.href = "intro.html";
+}
+</script>
+</body>
+</html>
