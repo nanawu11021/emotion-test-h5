@@ -35,8 +35,10 @@ body{background:#f3effb;padding:20px}
 </div>
 <div class="tip">点击任意选项，自动进入下一题</div>
 <script>
-localStorage.removeItem('scoreTotal');
-localStorage.removeItem('currentIndex');
+let scoreTotal = 0;
+let currentIndex = 0;
+const totalNum = 50;
+
 const questionList=[
 {"q":"别人随口一句负面评价，你会反复琢磨很久？","opt":["完全不会","偶尔会","经常会","一定会"]},
 {"q":"休息日你更愿意？","opt":["独处静养","和少数好友相处","应付社交但很累","频繁参加各种聚会"]},
@@ -90,27 +92,31 @@ const questionList=[
 {"q":"总是为还没到来的事提前担忧，消耗当下？","opt":["专注当下生活","轻微担忧","持续性前置焦虑","提前承受所有压力"]},
 {"q":"你常常因为心软，不断降低自己的底线？","opt":["底线坚定不动摇","小幅让步","底线不断后退","完全没有边界"]}
 ];
-let scoreTotal=0;
-let currentIndex=0;
-const totalNum=questionList.length;
+
 function render(){
 const item=questionList[currentIndex];
 document.getElementById('question').innerText=item.q;
 let html='';
-item.opt.forEach((opt,idx)=>{html+=`<div class="option" onclick="selectAnswer(${idx+1})">${String.fromCharCode(65+idx)}、${opt}</div>`;});
+item.opt.forEach((opt,idx)=>{
+html += `<div class="option" onclick="selectAnswer(${idx+1})">${String.fromCharCode(65+idx)}、${opt}</div>`;
+});
 document.getElementById('optionsBox').innerHTML=html;
 const per=((currentIndex+1)/totalNum*100).toFixed(1);
 document.getElementById('pageNum').innerText=`${currentIndex+1}/${totalNum}`;
 document.getElementById('per').innerText=per+'%';
 document.getElementById('progressBar').style.width=per+'%';
 }
+
 function selectAnswer(score){
-scoreTotal+=score;
+scoreTotal += score;
 currentIndex++;
-localStorage.setItem('scoreTotal',scoreTotal);
-localStorage.setItem('currentIndex',currentIndex);
-if(currentIndex>=totalNum){window.location.href="result.html";}else{render();}
+if(currentIndex >= totalNum){
+window.location.href="result.html";
+}else{
+render();
 }
+}
+// 页面加载直接从头渲染，不读取本地存储，兼容手机浏览器隐私模式
 render();
 </script>
 </body>
